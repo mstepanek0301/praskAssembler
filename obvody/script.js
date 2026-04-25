@@ -162,6 +162,7 @@ var buttonFinishEditing = document.getElementById("finish-editing");
 var toolbarView = document.getElementById("toolbar-view");
 var toolbarEditing = document.getElementById("toolbar-editing");
 var saveButton = document.getElementById("save");
+var reloadLevelButton = document.getElementById("reload-level");
 var exerciseContent = document.getElementById("exerciseContent");
 var simulationTimerHandle = null;
 
@@ -921,6 +922,12 @@ buttonFinishEditing.addEventListener("click", function () {
 
 saveButton.addEventListener("click", function () {
 	saveGameStateToStorage();
+})
+
+reloadLevelButton.addEventListener("click", function () {
+	if (!currentExerciseName) return;
+	localStorage.removeItem(GAME_STORAGE_KEY + "_" + currentExerciseName);
+	loadExercise(currentExerciseName);
 })
 
 

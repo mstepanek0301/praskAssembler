@@ -11280,9 +11280,9 @@
     "builtinCount": 4,
     "builtinLabels": [
         "prepínač",
-        "hodnota 1",
-        "hodnota 2",
-        "výsledok"
+        "poľutovanie",
+        "riešenie",
+        "výsledné správanie"
     ],
-    "zadanie": "Tu máš tri vstupy: prepínač a dve hodnoty. Prepínač určuje, ktorú hodnotu chceme dostať na výstup. Ak je prepínač vypnutý, tak žiarovka má byť v takom stave ako hodnota 1. Ak je vypínač zapnutý, tak žiarovka má byť v takom stave ako hodnota 2."
+    "zadanie": "Julka, ako každá žena, má svoje probleḿy. Keď príde na tieto problémy, niekedy chce iba poľutovať, inokedy zas chce počuť riešenie. Pomôž Lukášovi postaviť obvod ktorý toto zaručí. Tu máš tri vstupy: prepínač a dve hodnoty. Prepínač určuje, ktorú hodnotu chceme dostať na výstup. Ak je prepínač vypnutý, tak žiarovka má byť v takom stave ako hodnota 1. Ak je vypínač zapnutý, tak žiarovka má byť v takom stave ako hodnota 2."
 }

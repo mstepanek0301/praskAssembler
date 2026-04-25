@@ -1,0 +1,212 @@
+	<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Assembler Exercise</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <script src="https://cdn.jsdelivr.net/npm/marked/lib/marked.umd.js"></script>
+    <style>
+        :root {
+            --bg: #0f1115;
+            --panel: #151820;
+            --muted: #9aa4ad;
+            --text: #e6e9ee;
+            --accent: #4a91ff;
+            --border: #282d39;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        html, body {
+            height: 100%;
+        }
+
+        a {
+            color: var(--accent);
+            text-decoration: none;
+        }
+
+        body {
+            margin: 0;
+            background: var(--bg);
+            color: var(--text);
+            font: 14px/1.5 ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+        }
+
+        .wrap {
+            display: grid;
+            grid-template-rows: auto auto 1fr;
+            height: 100vh;
+        }
+
+        header {
+            border-bottom: 1px solid var(--border);
+            padding: 8px 12px;
+        }
+
+        .title {
+            color: var(--muted);
+        }
+
+        .main {
+            display: grid;
+            grid-template-columns:10% 1fr 40%;
+            gap: 12px;
+            padding: 12px;
+            min-height: 0;
+        }
+
+        .panel {
+            background: var(--panel);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 12px;
+            gap: 10px;
+            overflow-y: auto;
+            scrollbar-color: var(--border) transparent;
+        }
+
+        .controls {
+            color: var(--muted);
+            display: block;
+            margin-bottom: 8px;
+        }
+
+        input[type=number], textarea {
+            width: 100%;
+            background: #0f131a;
+            color: var(--text);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 8px;
+            outline: none;
+        }
+
+        textarea {
+            flex: 1;
+            resize: vertical;
+            min-height: 220px;
+        }
+
+        .btns {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        button {
+            background: #1d2330;
+            color: var(--text);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 8px 10px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            border-color: #3a4254;
+        }
+
+        .pc {
+            color: var(--muted);
+        }
+
+        .programLineHighlight{
+            color: var(--accent);
+        }
+
+        canvas {
+            width: 600px;
+            height: 600px;
+            max-width: 100%;
+            display: block;
+            background: #0f131a;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            touch-action: none;
+        }
+
+        .ex-list {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 8px;
+        }
+
+        .ex-btn {
+            text-align: left;
+        }
+
+        .info {
+            border-bottom: 1px solid var(--border);
+            color: var(--muted);
+            padding: 8px 12px;
+        }
+
+        @media (max-width: 1000px) {
+            .main {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .error {
+            color: red;
+        }
+        .finished{
+            background-color: forestgreen;
+        }
+    </style>
+    
+</head>
+<body>
+<div class="wrap">
+    <header>
+        <div class="title">Prask Obvody interaktívka</div>
+    </header>
+    <div class="info">Toto je interaktívna úloha, kde budeš vyrábať niečo ako elektrické obvody. Tu nájdeš zadania jednotlivých úloh a pri každej sa aj môžeš hrať s obvodom a na stránke si ho skladať.
+    </div>
+    <div class="main">
+        <!-- Left: Exercise list -->
+        <section class="panel">
+            <div class="ex-list" aria-label="exercises">
+                <button class="ex-btn" type="button" onclick="loadExercise('su-rovnake')">Sú rovnaké?</button>
+                <button class="ex-btn" type="button" onclick="loadExercise('chyba-and')">Chýba AND</button>
+                <button class="ex-btn" type="button" onclick="loadExercise('switch')">Switch</button>
+                <button class="ex-btn" type="button" onclick="loadExercise('scitavanie')">Sčítavanie</button>
+                <button class="ex-btn" type="button" onclick="loadExercise('playground')">Playground</button>
+            </div>
+        </section>
+
+        <section class="panel">
+            <canvas width="600" height="600" id="canvas"></canvas>
+            <div id="toolbar-view" hidden>
+                <button id="start-editing">Upraviť</button>
+                <button id="test-circuit">Otestovať</button>
+            </div>
+            <div id="toolbar-editing">
+                <button id="finish-editing">Dokončiť úpravy</button>
+                <button id="add-wire">Pridať kábel</button>
+                <label>Pridať zariadenie: <select id="add-device">
+                    <option value="-1">vyber aké</option>
+                    <option value="0">vypínač</option>
+                    <option value="1">žiarovku</option>
+                    <option value="2">predlžovačku</option>
+                    <option value="3">bránu "nie"</option>
+                    <option value="4">bránu "alebo"</option>
+                    <option value="5">bránu "a"</option>
+                </select></label>
+                <button id="delete-selected" disabled>Vymazať</button>
+                <button id="save">Uložiť</button>
+            </div>
+        </section>
+
+        <!-- Center: Exercise text -->
+        <section class="panel">
+            <div id="exerciseContent">Vyber zadanie</div>
+        </section>
+    </div>
+</div>
+</body>
+<script src="./script.js"></script>
+</html>

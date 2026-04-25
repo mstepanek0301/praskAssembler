@@ -1,0 +1,38 @@
+{
+  "su-rovnake": {
+    "title": "Sú rovnaké?",
+    "jsonFile": "su-rovnake.json",
+    "testInputCount": 2,
+    "testTimeLimit": 16,
+    "solutionBody": "return x % 3 === 0 ? 1 : 0;"
+  },
+  "chyba-and": {
+    "title": "Chýba AND",
+    "jsonFile": "chyba-ale.json",
+    "testInputCount": 2,
+    "testTimeLimit": 16,
+    "solutionBody": "return x === 3 ? 1 : 0;"
+  },
+  "switch": {
+    "title": "Switch",
+    "jsonFile": "switch.json",
+    "testInputCount": 3,
+    "testTimeLimit": 16,
+    "solutionBody": "return x === 2 || x >= 5 ? 1 : 0;"
+  },
+  "scitavanie": {
+    "title": "Sčítavanie",
+    "jsonFile": "scitavanie.json",
+    "testInputCount": 6,
+    "testTimeLimit": 16,
+    "solutionBody": "return (x >> 3) + (x % 8);"
+  },
+  "playground": {
+    "title": "Postav si vlastný obvod",
+    "jsonFile": "playground.json",
+  
+    "testInputCount": 0,
+    "testTimeLimit": 0,
+    "solutionBody": "return true;"
+  }
+}

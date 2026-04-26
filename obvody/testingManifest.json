@@ -4,7 +4,7 @@
     "jsonFile": "tutorial.json",
     "testInputCount": 2,
     "testTimeLimit": 16,
-    "solutionBody": "return x=== 2 ? 1 : 0;"
+    "solutionBody": "return x === 1 ? 1 : 0;"
   },
   "su-rovnake": {
     "title": "Sú rovnaké?",

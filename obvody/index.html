@@ -105,7 +105,16 @@
             cursor: pointer;
         }
 
-        button:hover {
+        button:disabled {
+            background: #3e3e3e;
+            color: var(--text);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 8px 10px;
+            cursor: not-allowed;
+        }
+
+        button:hover:enabled {
             border-color: #3a4254;
         }
 
@@ -172,6 +181,8 @@
         .finished{
             background-color: forestgreen;
         }
+
+
     </style>
     
 </head>
@@ -186,12 +197,12 @@
         <!-- Left: Exercise list -->
         <section class="panel">
             <div class="ex-list" aria-label="exercises">
-                <button class="ex-btn" type="button" onclick="loadExercise('tutorial')">Tutoriál</button>
-                <button class="ex-btn" type="button" onclick="loadExercise('su-rovnake')">Sú rovnaké?</button>
-                <button class="ex-btn" type="button" onclick="loadExercise('chyba-and')">Chýba AND</button>
-                <button class="ex-btn" type="button" onclick="loadExercise('switch')">Switch</button>
-                <button class="ex-btn" type="button" onclick="loadExercise('scitavanie')">Sčítavanie</button>
-                <button class="ex-btn" type="button" onclick="loadExercise('playground')">Playground</button>
+                <button class="ex-btn" id="tutorial" type="button" onclick="loadExercise('tutorial')">Tutoriál</button>
+                <button class="ex-btn" id="su-rovnake" type="button" onclick="loadExercise('su-rovnake')">Sú rovnaké?</button>
+                <button class="ex-btn" id="chyba-and" type="button" onclick="loadExercise('chyba-and')">Chýba AND</button>
+                <button class="ex-btn" id="switch" type="button" onclick="loadExercise('switch')">Switch</button>
+                <button class="ex-btn" id="scitavanie" type="button" onclick="loadExercise('scitavanie')">Sčítavanie</button>
+                <button class="ex-btn" id="playground" type="button" onclick="loadExercise('playground')">Playground</button>
             </div>
         </section>
 

@@ -934,6 +934,9 @@ function loadFromString(data) {
 }
 
 buttonDelete.addEventListener("click", function () {
+	addingDevice = -1
+	selectAddDevice.value = "-1";
+	console.log("Deleting")
 	if (selectedDevice !== -1) {
 		gameState.deviceKinds[selectedDevice] = DEVICE_KIND_NONE;
 		for (var i = 0; i < 2 * MAX_WIRES; ++i) {
@@ -1055,7 +1058,13 @@ async function loadExercise(name) {
 		testBtn.hidden = false;
 		testBtn.onclick = function () {
 			var solution = new Function("x", ex.solutionBody);
-			if (test(ex.testInputCount, ex.testTimeLimit, solution)) alert("Správne!");
+			let result = test(ex.testInputCount, ex.testTimeLimit, solution) 
+			if (result){ 
+				alert("Správne!");
+				displayConfetti();
+				localStorage.setItem(name, "solved");
+				document.getElementById(name).classList.add("finished");
+			}
 			else alert("Nesprávne.");
 			fillArray(gameState.nodeValues, false);
 		};
@@ -1069,7 +1078,59 @@ async function loadExercise(name) {
 	requestRedraw();
 }
 
+async function markPreviouslyCompleted(){
+	if (!manifest) {
+		var resp = await fetch("testingManifest.json");
+		manifest = await resp.json();
+	}
+	for (key in manifest){
+		if (localStorage.getItem(key) === "solved") {
+			document.getElementById(key).classList.add("finished");
+		}
+	}
+}
+
+function displayConfetti() {
+    const colors = ['#ff0', '#0f0', '#0ff', '#f0f', '#f00', '#00f'];
+
+    for (let i = 0; i < 100; i++) {
+        const confetti = document.createElement('div');
+
+        const size = Math.floor(Math.random() * 8 + 4) + 'px';
+        confetti.style.width = size;
+        confetti.style.height = size;
+
+        confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+
+        confetti.style.position = 'absolute';
+        confetti.style.left = Math.random() * (window.innerWidth-50) + 'px';
+        confetti.style.top = Math.random() * (window.innerHeight) / 2 + 'px';
+
+        const rotate = Math.random() * 360;
+        confetti.style.transform = `rotate(${rotate}deg)`;
+
+        const duration = Math.random() * 2 + 2;
+        confetti.style.transition = `transform ${duration}s linear, top ${duration}s linear, opacity ${duration}s`;
+
+        document.body.appendChild(confetti);
+
+        requestAnimationFrame(() => {
+            confetti.style.top = (window.innerHeight-20) + 'px';
+            confetti.style.transform = `rotate(${rotate + 360}deg)`;
+            confetti.style.opacity = '0';
+        });
+
+        setTimeout(() => {
+            confetti.remove();
+        }, duration * 1000);
+
+    }
+}
+
+
 updateCanvasSize();
 resetView();
 updateExerciseContent();
 requestRedraw();
+
+markPreviouslyCompleted().then(() => {});

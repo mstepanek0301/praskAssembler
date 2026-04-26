@@ -591,7 +591,7 @@ function draw() {
 		drawWire(
 			draggedWire,
 			(1 - isWireEnd) * dx, (1 - isWireEnd) * dy,
-			isWireEnd * dx, isWireEnd * dy, true
+			isWireEnd * dx/gameState.viewScale, isWireEnd * dy/gameState.viewScale, true
 		);
 	}
 }

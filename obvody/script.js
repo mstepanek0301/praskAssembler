@@ -858,6 +858,7 @@ if (PointerEvent) {
 
 	canvas.addEventListener("pointerup", function (event) {
 		if (event.pointerId === dragPointerId) dragPointerId = -2;
+		else return; // If the pointer released is not the one that's doing the dragging, ignore
 		canvas.releasePointerCapture(event.pointerId);
 		if (draggedDevice !== -1) {
 			if (gameState.devicePositions[draggedDevice] !== draggedDeviceTargetPosition) {
@@ -1049,8 +1050,9 @@ async function loadExercise(name) {
 		loadFromString(await response.text());
 	}
 
-	// Handle disabled devices in toolbar
-	var options = selectAddDevice.options;
+	// For the puzzle with disabled AND, disable the option, otherwise enable it
+	// At least for now, it's simplest to hard-code
+	document.getElementById("option-add-and-gate").disabled = name === "chyba-and";
 
 	// Bind test button
 	var testBtn = document.getElementById("test-circuit");

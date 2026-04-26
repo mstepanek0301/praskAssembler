@@ -2,9 +2,9 @@
   "tutorial": {
     "title": "Tutorial",
     "jsonFile": "tutorial.json",
-    "testInputCount": 0,
-    "testTimeLimit": 0,
-    "solutionBody": "return true;"
+    "testInputCount": 2,
+    "testTimeLimit": 16,
+    "solutionBody": "return x=== 2 ? 1 : 0;"
   },
   "su-rovnake": {
     "title": "Sú rovnaké?",

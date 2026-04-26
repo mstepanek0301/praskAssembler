@@ -1,4 +1,11 @@
 {
+  "tutorial": {
+    "title": "Tutorial",
+    "jsonFile": "tutorial.json",
+    "testInputCount": 0,
+    "testTimeLimit": 0,
+    "solutionBody": "return true;"
+  },
   "su-rovnake": {
     "title": "Sú rovnaké?",
     "jsonFile": "su-rovnake.json",

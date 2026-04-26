@@ -28,6 +28,9 @@ var WIRE_OUTER_WIDTH = 7;
 var WIRE_INNER_WIDTH = 3;
 var WIRE_NODE_INNER_RADIUS = 5;
 var WIRE_NODE_OUTER_RADIUS = 7;
+var MIN_VIEW_SCALE = 0.35;
+var MAX_VIEW_SCALE = 3.5;
+var ZOOM_STEP = 1.15;
 var COLOR_OFF = "black";
 var COLOR_ON = "lightyellow";
 var SWITCH_TOGGLE_WIDTH = 34;
@@ -79,34 +82,67 @@ function countUsedWiresFromStack(stack) {
 	return count;
 }
 
+function applySparseEntries(targetArray, sparseEntries) {
+	if (!sparseEntries || typeof sparseEntries !== "object") return;
+	for (var key in sparseEntries) {
+		if (!Object.prototype.hasOwnProperty.call(sparseEntries, key)) continue;
+		var index = Math.floor(Number(key));
+		if (!Number.isFinite(index)) continue;
+		if (index < 0 || index >= targetArray.length) continue;
+		targetArray[index] = sparseEntries[key];
+	}
+}
+
+function normalizeArrayFromRaw(rawValue, sparseRawValue, targetLength, defaultValue) {
+	var result;
+	if (Array.isArray(rawValue)) {
+		result = rawValue.slice(0, targetLength);
+	} else {
+		result = makeFilledArray(targetLength, defaultValue);
+		applySparseEntries(result, sparseRawValue);
+	}
+	while (result.length < targetLength) result.push(defaultValue);
+	return result;
+}
+
 function normalizeLoadedGameState(rawGameState) {
 	var defaults = createDefaultGameState();
 	if (!rawGameState || typeof rawGameState !== "object") return defaults;
 
-	defaults.devicePositions = Array.isArray(rawGameState.devicePositions)
-		? rawGameState.devicePositions.slice(0, MAX_DEVICES)
-		: defaults.devicePositions;
-	while (defaults.devicePositions.length < MAX_DEVICES) defaults.devicePositions.push(-1);
+	defaults.devicePositions = normalizeArrayFromRaw(
+		rawGameState.devicePositions,
+		rawGameState.devicePositionsSparse,
+		MAX_DEVICES,
+		-1
+	);
 
-	defaults.deviceKinds = Array.isArray(rawGameState.deviceKinds)
-		? rawGameState.deviceKinds.slice(0, MAX_DEVICES)
-		: defaults.deviceKinds;
-	while (defaults.deviceKinds.length < MAX_DEVICES) defaults.deviceKinds.push(DEVICE_KIND_NONE);
+	defaults.deviceKinds = normalizeArrayFromRaw(
+		rawGameState.deviceKinds,
+		rawGameState.deviceKindsSparse,
+		MAX_DEVICES,
+		DEVICE_KIND_NONE
+	);
 
-	defaults.nodeValues = Array.isArray(rawGameState.nodeValues)
-		? rawGameState.nodeValues.slice(0, 3 * MAX_DEVICES)
-		: defaults.nodeValues;
-	while (defaults.nodeValues.length < 3 * MAX_DEVICES) defaults.nodeValues.push(false);
+	defaults.nodeValues = normalizeArrayFromRaw(
+		rawGameState.nodeValues,
+		rawGameState.nodeValuesSparse,
+		3 * MAX_DEVICES,
+		false
+	);
 
-	defaults.wires = Array.isArray(rawGameState.wires)
-		? rawGameState.wires.slice(0, 2 * MAX_WIRES)
-		: defaults.wires;
-	while (defaults.wires.length < 2 * MAX_WIRES) defaults.wires.push(-1);
+	defaults.wires = normalizeArrayFromRaw(
+		rawGameState.wires,
+		rawGameState.wiresSparse,
+		2 * MAX_WIRES,
+		-1
+	);
 
-	defaults.wireStack = Array.isArray(rawGameState.wireStack)
-		? rawGameState.wireStack.slice(0, MAX_WIRES)
-		: defaults.wireStack;
-	while (defaults.wireStack.length < MAX_WIRES) defaults.wireStack.push(-1);
+	defaults.wireStack = normalizeArrayFromRaw(
+		rawGameState.wireStack,
+		rawGameState.wireStackSparse,
+		MAX_WIRES,
+		-1
+	);
 
 	defaults.wireCount = typeof rawGameState.wireCount === "number"
 		? clamp(0, Math.floor(rawGameState.wireCount), MAX_WIRES)
@@ -117,10 +153,12 @@ function normalizeLoadedGameState(rawGameState) {
 	defaults.builtinCount = typeof rawGameState.builtinCount === "number"
 		? clamp(0, Math.floor(rawGameState.builtinCount), MAX_DEVICES)
 		: defaults.builtinCount;
-	defaults.builtinLabels = Array.isArray(rawGameState.builtinLabels)
-		? rawGameState.builtinLabels.slice(0, MAX_DEVICES)
-		: defaults.builtinLabels;
-	while (defaults.builtinLabels.length < MAX_DEVICES) defaults.builtinLabels.push("");
+	defaults.builtinLabels = normalizeArrayFromRaw(
+		rawGameState.builtinLabels,
+		rawGameState.builtinLabelsSparse,
+		MAX_DEVICES,
+		""
+	);
 	defaults.zadanie = typeof rawGameState.zadanie === "string" ? rawGameState.zadanie : defaults.zadanie;
 
 	return defaults;
@@ -164,11 +202,23 @@ var toolbarEditing = document.getElementById("toolbar-editing");
 var saveButton = document.getElementById("save");
 var reloadLevelButton = document.getElementById("reload-level");
 var exerciseContent = document.getElementById("exerciseContent");
+var zoomInButton = document.getElementById("zoom-in");
+var zoomOutButton = document.getElementById("zoom-out");
+var zoomResetButton = document.getElementById("zoom-reset");
 var simulationTimerHandle = null;
 
 function updateExerciseContent() {
 	if (!exerciseContent) return;
-	exerciseContent.textContent = gameState.zadanie || "Vyber zadanie";
+	if (!gameState.zadanie) {
+		exerciseContent.textContent = "Vyber zadanie";
+		return;
+	}
+
+	if (typeof marked !== "undefined" && typeof marked.parse === "function") {
+		exerciseContent.innerHTML = marked.parse(gameState.zadanie);
+	} else {
+		exerciseContent.textContent = gameState.zadanie;
+	}
 }
 
 // Current selection and action
@@ -576,6 +626,24 @@ function resetView() {
 	gameState.viewOffsetY = (GRID_CELL_SIZE * GRID_SIZE - canvasHeight) / 2;
 }
 
+function zoomAroundScreenPoint(screenX, screenY, scaleFactor) {
+	var oldScale = gameState.viewScale;
+	var newScale = clamp(MIN_VIEW_SCALE, oldScale * scaleFactor, MAX_VIEW_SCALE);
+	if (newScale === oldScale) return;
+
+	var worldX = (screenX + gameState.viewOffsetX) / oldScale;
+	var worldY = (screenY + gameState.viewOffsetY) / oldScale;
+
+	gameState.viewScale = newScale;
+	gameState.viewOffsetX = worldX * newScale - screenX;
+	gameState.viewOffsetY = worldY * newScale - screenY;
+	requestRedraw();
+}
+
+function zoomAroundCanvasCenter(scaleFactor) {
+	zoomAroundScreenPoint(canvasWidth / 2, canvasHeight / 2, scaleFactor);
+}
+
 window.addEventListener("resize", function () {
 	updateCanvasSize();
 	requestRedraw();
@@ -583,6 +651,12 @@ window.addEventListener("resize", function () {
 
 window.addEventListener("load", function () {
 })
+
+canvas.addEventListener("wheel", function (event) {
+	event.preventDefault();
+	var factor = Math.exp(-event.deltaY * 0.0015);
+	zoomAroundScreenPoint(event.offsetX, event.offsetY, factor);
+}, { passive: false });
 
 // If pointer events are supported, we use only those
 if (PointerEvent) {
@@ -929,6 +1003,25 @@ reloadLevelButton.addEventListener("click", function () {
 	localStorage.removeItem(GAME_STORAGE_KEY + "_" + currentExerciseName);
 	loadExercise(currentExerciseName);
 })
+
+if (zoomInButton) {
+	zoomInButton.addEventListener("click", function () {
+		zoomAroundCanvasCenter(ZOOM_STEP);
+	});
+}
+
+if (zoomOutButton) {
+	zoomOutButton.addEventListener("click", function () {
+		zoomAroundCanvasCenter(1 / ZOOM_STEP);
+	});
+}
+
+if (zoomResetButton) {
+	zoomResetButton.addEventListener("click", function () {
+		resetView();
+		requestRedraw();
+	});
+}
 
 
 async function loadExercise(name) {

@@ -38,5 +38,5 @@
     "8": "x + y: druhá číslica (štvorky)",
     "9": "x + y: prvá číslica (osmičky)"
   },
-  "zadanie": "Lukáš kupuje Julke bonboniéru a kvety, no nie je si istý koľko ho to vo výledku bude stáť. Pomôž mu nájsť ich súčet. Na vstupe máš dve trojciferné čísla x a y napísané v dvojkovej sústave. Zapnutý vypínač znamená 1, vypnutý 0. Výstup sú 4 žiarovky, ktorými máš napísať (v dvojkovej sústave) súčet x + y."
+  "zadanie": "Lukáš kupuje Julke bonboniéru a kvety, no nie je si istý koľko ho to vo výledku bude stáť. Pomôž mu nájsť ich súčet. Na vstupe máš dve trojciferné čísla x a y napísané v dvojkovej sústave. Zapnutý vypínač znamená 1, vypnutý 0. Výstup sú 4 žiarovky, ktorými máš napísať (v dvojkovej sústave) súčet x + y. 30b"
 }

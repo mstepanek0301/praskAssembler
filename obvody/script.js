@@ -1002,6 +1002,44 @@ saveButton.addEventListener("click", function () {
 	saveGameStateToStorage();
 })
 
+document.getElementById("export-json").addEventListener("click", function () {
+	var json = JSON.stringify(gameState, null, 2);
+	navigator.clipboard.writeText(json).then(function () {
+		alert("JSON skopírovaný do schránky!");
+	}, function () {
+		prompt("Skopíruj JSON:", json);
+	});
+});
+
+document.getElementById("export-for-veduci").addEventListener("click", async function () {
+	if (!manifest) {
+		var resp = await fetch("testingManifest.json");
+		manifest = await resp.json();
+	}
+	var commands = [];
+	for (var key in manifest) {
+		var storageKey = GAME_STORAGE_KEY + "_" + key;
+		var saved = localStorage.getItem(storageKey);
+		if (saved) {
+			commands.push("localStorage.setItem(" + JSON.stringify(storageKey) + ", " + JSON.stringify(saved) + ");");
+		}
+		var solved = localStorage.getItem(key);
+		if (solved) {
+			commands.push("localStorage.setItem(" + JSON.stringify(key) + ", " + JSON.stringify(solved) + ");");
+		}
+	}
+	if (commands.length === 0) {
+		alert("Žiadny uložený stav na export.");
+		return;
+	}
+	var script = commands.join("\n") + "\nlocation.reload();";
+	navigator.clipboard.writeText(script).then(function () {
+		alert("Príkaz skopírovaný do schránky! Pošli ho vedúcim.");
+	}, function () {
+		prompt("Skopíruj tento príkaz do riešenia:", script);
+	});
+});
+
 reloadLevelButton.addEventListener("click", function () {
 	if (!currentExerciseName) return;
 	localStorage.removeItem(GAME_STORAGE_KEY + "_" + currentExerciseName);
